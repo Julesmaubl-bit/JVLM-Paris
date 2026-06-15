@@ -1,0 +1,398 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Courier+Prime:wght@400;700&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0a0a0a;color:#f5f5f0;font-family:'Courier Prime',monospace;overflow-x:hidden}
+  #site{width:100%;min-height:100vh;background:#0a0a0a}
+  .receipt-header{text-align:center;padding:2rem 1rem 1rem;border-bottom:2px dashed #333;position:relative}
+  .receipt-header::before{content:'★ ★ ★ JVLM PARIS ★ ★ ★';display:block;font-size:11px;letter-spacing:3px;color:#888;margin-bottom:8px}
+  .brand-logo{font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,10vw,96px);color:#f5f5f0;letter-spacing:4px;line-height:1}
+  .brand-sub{font-size:11px;letter-spacing:8px;color:#cc0000;margin-top:4px}
+  .receipt-line{font-size:10px;color:#555;margin-top:8px;letter-spacing:1px}
+  .dept-label{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:4px;color:#cc0000;text-align:center;padding:1rem;border-bottom:1px solid #222}
+  .shelf-section{padding:2rem 1rem;background:#0f0f0f;border-bottom:1px solid #222}
+  .section-header{display:flex;align-items:baseline;gap:12px;margin-bottom:1.5rem;padding-bottom:8px;border-bottom:1px solid #1a1a1a}
+  .section-sku{font-size:10px;color:#555;letter-spacing:2px}
+  .section-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:#f5f5f0}
+  .section-price{font-size:10px;color:#cc0000;margin-left:auto;letter-spacing:1px}
+  #canvas-container{width:100%;height:420px;position:relative;cursor:grab;background:#111;border:1px solid #1a1a1a}
+  #canvas-container:active{cursor:grabbing}
+  #three-canvas{width:100%;height:100%;display:block}
+  .products-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;background:#1a1a1a;margin-top:1px}
+  .product-card{background:#111;padding:1rem;cursor:pointer;transition:background 0.2s;position:relative}
+  .product-card:hover{background:#1a1a1a}
+  .product-card.active{background:#1a1a1a;border-left:2px solid #cc0000}
+  .product-badge{font-size:9px;letter-spacing:2px;color:#cc0000;margin-bottom:6px}
+  .product-name{font-family:'Bebas Neue',sans-serif;font-size:20px;color:#f5f5f0;line-height:1.1}
+  .product-desc{font-size:10px;color:#666;margin-top:4px;line-height:1.5}
+  .product-weight{font-size:9px;color:#444;margin-top:8px;border-top:1px dashed #222;padding-top:6px}
+  .barcode{display:flex;align-items:flex-end;gap:1px;height:28px;margin-top:6px}
+  .barcode span{background:#f5f5f0;display:block;height:100%}
+  .barcode-num{font-size:8px;color:#555;letter-spacing:1px;margin-top:2px}
+  .cart-section{padding:2rem 1rem;background:#0a0a0a;border-top:2px solid #222}
+  .cart-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;padding-bottom:8px;border-bottom:1px dashed #333}
+  .cart-title{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px}
+  .cart-count{font-size:11px;color:#cc0000;letter-spacing:2px}
+  .cart-items{border-top:1px solid #1a1a1a}
+  .cart-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px dashed #1a1a1a;gap:8px}
+  .cart-item-name{font-size:12px;letter-spacing:1px;flex:1}
+  .cart-item-qty{font-size:11px;color:#888;width:30px;text-align:center}
+  .cart-item-price{font-size:12px;color:#f5f5f0;font-weight:700;text-align:right;min-width:60px}
+  .cart-item-remove{font-size:10px;color:#333;cursor:pointer;padding:2px 6px;border:1px solid #222;transition:all 0.2s}
+  .cart-item-remove:hover{color:#cc0000;border-color:#cc0000}
+  .cart-totals{margin-top:1rem;padding-top:1rem;border-top:2px dashed #333}
+  .total-row{display:flex;justify-content:space-between;font-size:11px;color:#888;margin-bottom:4px}
+  .total-row.grand{font-family:'Bebas Neue',sans-serif;font-size:22px;color:#f5f5f0;margin-top:8px;border-top:2px solid #f5f5f0;padding-top:8px}
+  .total-row.tax{color:#555;font-size:10px}
+  .checkout-btn{width:100%;margin-top:1.5rem;padding:14px;background:#cc0000;color:#f5f5f0;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;border:none;cursor:pointer;transition:background 0.2s}
+  .checkout-btn:hover{background:#aa0000}
+  .receipt-footer{text-align:center;padding:1.5rem 1rem;border-top:2px dashed #333;font-size:10px;color:#333;line-height:2;letter-spacing:1px}
+  .nutritional{background:#0f0f0f;border:1px solid #222;margin:1rem 0;padding:1rem}
+  .nutrition-title{font-family:'Bebas Neue',sans-serif;font-size:18px;border-bottom:6px solid #f5f5f0;padding-bottom:4px;margin-bottom:8px}
+  .nutrition-row{display:flex;justify-content:space-between;font-size:10px;border-bottom:1px solid #1a1a1a;padding:4px 0;color:#888}
+  .nutrition-row strong{color:#f5f5f0}
+  .add-btn{width:100%;margin-top:8px;padding:8px;background:transparent;border:1px solid #333;color:#888;font-family:'Courier Prime',monospace;font-size:11px;letter-spacing:2px;cursor:pointer;transition:all 0.2s}
+  .add-btn:hover{border-color:#cc0000;color:#cc0000}
+  .add-btn.added{border-color:#f5f5f0;color:#f5f5f0}
+  .floating-script{font-size:28px;color:#cc0000;opacity:0.08;position:absolute;right:10px;top:10px;pointer-events:none;font-style:italic;line-height:1;font-family:Georgia,serif}
+  .ticker{font-size:9px;color:#333;letter-spacing:2px;overflow:hidden;white-space:nowrap;padding:4px 0;border-top:1px solid #111;border-bottom:1px solid #111}
+  .ticker-inner{display:inline-block;animation:ticker 20s linear infinite}
+  @keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+  .color-selector{display:flex;gap:6px;margin-top:8px}
+  .color-dot{width:14px;height:14px;border-radius:50%;cursor:pointer;border:1px solid #333;transition:transform 0.2s}
+  .color-dot:hover{transform:scale(1.3)}
+  .color-dot.selected{border-color:#f5f5f0;transform:scale(1.2)}
+</style>
+
+<div id="site">
+  <div class="receipt-header">
+    <div style="font-size:10px;color:#444;letter-spacing:2px;margin-bottom:6px">REF: JV-2026-001 | DATE: 15/06/2026</div>
+    <div class="brand-logo">JVLM</div>
+    <div class="brand-sub">PARIS — EST. MMXXIV</div>
+    <div class="receipt-line">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+    <div style="font-size:10px;color:#555;margin-top:6px;letter-spacing:1px">PREMIUM STREETWEAR SERVICES<br>AISLE 01 · SHELF B · LE MARAIS, 75003</div>
+  </div>
+
+  <div class="ticker">
+    <div class="ticker-inner">★ JVLM PARIS — PREMIUM DROPS ★ NEW COLLECTION SS26 ★ LIMITED EDITION STRIPED HENLEY ★ FREE SHIPPING OVER 150€ ★ JVLM PARIS — PREMIUM DROPS ★ NEW COLLECTION SS26 ★ LIMITED EDITION STRIPED HENLEY ★ FREE SHIPPING OVER 150€ ★ &nbsp;&nbsp;&nbsp;&nbsp;</div>
+  </div>
+
+  <div class="dept-label">— DEPT. 01 · COLLECTIONS —</div>
+
+  <div class="shelf-section">
+    <div class="section-header">
+      <span class="section-sku">SKU #JVLM-3D</span>
+      <span class="section-title">Product Preview</span>
+      <span class="section-price">INTERACTIVE · DRAG TO ROTATE</span>
+    </div>
+    <div id="canvas-container">
+      <canvas id="three-canvas"></canvas>
+      <div style="position:absolute;bottom:12px;left:12px;font-size:9px;color:#444;letter-spacing:2px">← DRAG TO ROTATE · SCROLL TO ZOOM →</div>
+      <div style="position:absolute;top:12px;right:12px;font-size:9px;color:#333;letter-spacing:1px" id="product-label">JVLM SS26</div>
+    </div>
+    <div class="products-grid" id="product-grid"></div>
+  </div>
+
+  <div class="shelf-section">
+    <div class="section-header">
+      <span class="section-sku">SKU #JVLM-NUT</span>
+      <span class="section-title">Nutritional Info</span>
+    </div>
+    <div class="nutritional">
+      <div class="nutrition-title">Nutritional Facts / Faits Nutritionnels</div>
+      <div style="font-size:10px;color:#555;margin-bottom:8px">Serving size: 1 Drop (1 pièce) | Servings per collection: Variable</div>
+      <div class="nutrition-row"><span>Exclusivité</span><strong>100%</strong></div>
+      <div class="nutrition-row"><span>Qualité matière</span><strong>Premium</strong></div>
+      <div class="nutrition-row"><span>Savoir-faire parisien</span><strong>100%</strong></div>
+      <div class="nutrition-row"><span>Edition limitée</span><strong>Oui</strong></div>
+      <div class="nutrition-row"><span>Hype content</span><strong>Élevé</strong></div>
+      <div class="nutrition-row"><span>Calories portées</span><strong>0 kcal</strong></div>
+      <div style="font-size:9px;color:#333;margin-top:8px;line-height:1.6">* % Valeurs quotidiennes basées sur un régime de 2000 pièces. Votre swag quotidien peut être supérieur selon votre style.</div>
+    </div>
+  </div>
+
+  <div class="cart-section" id="cart-section">
+    <div class="cart-header">
+      <div class="cart-title">🛒 VOTRE PANIER</div>
+      <div class="cart-count" id="cart-count">0 ARTICLES</div>
+    </div>
+    <div class="cart-items" id="cart-items">
+      <div style="text-align:center;padding:2rem;font-size:11px;color:#333;letter-spacing:2px" id="empty-msg">— PANIER VIDE —<br>AJOUTEZ DES PRODUITS</div>
+    </div>
+    <div class="cart-totals" id="cart-totals" style="display:none">
+      <div class="total-row"><span>SOUS-TOTAL</span><span id="subtotal">0.00€</span></div>
+      <div class="total-row tax"><span>TVA 20%</span><span id="tax">0.00€</span></div>
+      <div class="total-row tax"><span>LIVRAISON EXPRESS PARIS</span><span>9.90€</span></div>
+      <div class="total-row grand"><span>TOTAL</span><span id="grand-total">0.00€</span></div>
+    </div>
+    <button class="checkout-btn" onclick="checkout()">PROCÉDER AU PAIEMENT ▶</button>
+  </div>
+
+  <div class="receipt-footer">
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br>
+    MERCI DE VOTRE VISITE<br>
+    JVLM PARIS · LE MARAIS · 75003<br>
+    WWW.JVLM-PARIS.COM<br>
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━<br>
+    <span style="font-style:italic;font-size:9px;color:#222">Votre satisfaction est notre priorité absolue.</span><br>
+    <span style="font-size:9px;color:#1a1a1a">||||||||||||||||||||||||||||||||||||||||||||</span><br>
+    <span style="font-size:8px;color:#1a1a1a">4 002 607 4059 8123</span>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script>
+const PRODUCTS = [
+  {id:1, name:"STRIPED HENLEY", badge:"NEW DROP", sku:"JV-SH-001", price:89, weight:"300g · 100% Coton BIO", desc:"B&W rugby stripes, waffle texture, henley collar with 3 buttons.", colors:["#f5f5f0","#0a0a0a","#cc0000"], barcode:"4002607405981"},
+  {id:2, name:"SCRIPT TEE", badge:"SIGNATURE", sku:"JV-ST-002", price:79, weight:"240g · Jersey Premium", desc:"Classic white tee with red JVLM script print.", colors:["#f5f5f0","#cc0000","#888"], barcode:"4002607405998"},
+  {id:3, name:"LOGO HOODIE", badge:"BESTSELLER", sku:"JV-LH-003", price:149, weight:"450g · Molleton Premium", desc:"Heavy hoodie with embossed JVLM block logo.", colors:["#0a0a0a","#333","#f5f5f0"], barcode:"4002607406001"},
+  {id:4, name:"CARGO PANT", badge:"SS26", sku:"JV-CP-004", price:129, weight:"520g · Ripstop Noir", desc:"Technical cargo with JVLM tape détail on leg.", colors:["#0a0a0a","#333","#444"], barcode:"4002607406018"},
+];
+
+let cart = [];
+let activeProduct = 0;
+let scene, camera, renderer, productGroup, isDragging=false, prevMouse={x:0,y:0};
+
+function buildBarcode(code){
+  const bar = document.createElement('div');
+  bar.className='barcode';
+  const widths=[1,2,1,1,2,1,3,1,2,1,1,2,1,2,3,1,1,2,1,1];
+  widths.forEach((w,i)=>{
+    const s=document.createElement('span');
+    s.style.width=w*2+'px';
+    s.style.opacity= i%2===0?'1':'0';
+    s.style.height='100%';
+    if(i%2===0){const b2=document.createElement('span');b2.style.width=w*2+'px';b2.style.background='#f5f5f0';b2.style.display='inline-block';b2.style.height='100%';bar.appendChild(b2);}
+    else{const b2=document.createElement('span');b2.style.width=w*1.5+'px';b2.style.display='inline-block';b2.style.height='100%';bar.appendChild(b2);}
+  });
+  const bnum=document.createElement('div');
+  bnum.className='barcode-num';
+  bnum.textContent=code;
+  const wrap=document.createElement('div');
+  wrap.appendChild(bar);wrap.appendChild(bnum);
+  return wrap;
+}
+
+function buildGrid(){
+  const grid=document.getElementById('product-grid');
+  PRODUCTS.forEach((p,i)=>{
+    const card=document.createElement('div');
+    card.className='product-card'+(i===0?' active':'');
+    card.id='pcard-'+i;
+    const colorDots=p.colors.map((c,ci)=>`<div class="color-dot${ci===0?' selected':''}" style="background:${c}" onclick="event.stopPropagation();selectColor(${i},${ci},this)" title="${c}"></div>`).join('');
+    card.innerHTML=`
+      <div class="floating-script">J</div>
+      <div class="product-badge">${p.badge}</div>
+      <div class="product-name">${p.name}</div>
+      <div class="product-desc">${p.desc}</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:#cc0000;margin-top:8px">${p.price}€</div>
+      <div class="color-selector">${colorDots}</div>
+      <div class="product-weight">${p.sku} · ${p.weight}</div>
+      <div id="barcode-${i}"></div>
+      <button class="add-btn" id="addbtn-${i}" onclick="addToCart(${i})">+ AJOUTER AU PANIER</button>
+    `;
+    card.addEventListener('click',()=>selectProduct(i));
+    grid.appendChild(card);
+    document.getElementById('barcode-'+i).appendChild(buildBarcode(p.barcode));
+  });
+}
+
+function selectProduct(i){
+  activeProduct=i;
+  document.querySelectorAll('.product-card').forEach((c,j)=>{
+    c.classList.toggle('active',j===i);
+  });
+  document.getElementById('product-label').textContent=PRODUCTS[i].name;
+  updateBoxColor(PRODUCTS[i].colors[0]);
+  if(productGroup){
+    gsap.to(productGroup.rotation,{y:productGroup.rotation.y+Math.PI*2,duration:0.8,ease:'power2.out'});
+  }
+}
+
+function selectColor(pi,ci,el){
+  document.querySelectorAll(`#pcard-${pi} .color-dot`).forEach(d=>d.classList.remove('selected'));
+  el.classList.add('selected');
+  if(pi===activeProduct) updateBoxColor(PRODUCTS[pi].colors[ci]);
+}
+
+function addToCart(i){
+  const p=PRODUCTS[i];
+  const existing=cart.find(c=>c.id===p.id);
+  if(existing){existing.qty++;}
+  else{cart.push({...p,qty:1});}
+  renderCart();
+  const btn=document.getElementById('addbtn-'+i);
+  btn.classList.add('added');
+  btn.textContent='✓ AJOUTÉ';
+  setTimeout(()=>{btn.classList.remove('added');btn.textContent='+ AJOUTER AU PANIER';},1500);
+  gsap.from('#cart-section',{borderTopColor:'#cc0000',duration:0.3});
+}
+
+function removeFromCart(id){
+  cart=cart.filter(c=>c.id!==id);
+  renderCart();
+}
+
+function renderCart(){
+  const items=document.getElementById('cart-items');
+  const totals=document.getElementById('cart-totals');
+  const empty=document.getElementById('empty-msg');
+  document.getElementById('cart-count').textContent=cart.reduce((a,c)=>a+c.qty,0)+' ARTICLES';
+  if(cart.length===0){
+    items.innerHTML='<div style="text-align:center;padding:2rem;font-size:11px;color:#333;letter-spacing:2px" id="empty-msg">— PANIER VIDE —<br>AJOUTEZ DES PRODUITS</div>';
+    totals.style.display='none';
+    return;
+  }
+  totals.style.display='block';
+  const rows=cart.map(c=>`
+    <div class="cart-item">
+      <div class="cart-item-name">${c.sku}<br>${c.name}</div>
+      <div class="cart-item-qty">×${c.qty}</div>
+      <div class="cart-item-price">${(c.price*c.qty).toFixed(2)}€</div>
+      <div class="cart-item-remove" onclick="removeFromCart(${c.id})">✕</div>
+    </div>
+  `).join('');
+  items.innerHTML=rows;
+  const sub=cart.reduce((a,c)=>a+(c.price*c.qty),0);
+  const tax=sub*0.2;
+  const grand=sub+tax+9.9;
+  document.getElementById('subtotal').textContent=sub.toFixed(2)+'€';
+  document.getElementById('tax').textContent=tax.toFixed(2)+'€';
+  document.getElementById('grand-total').textContent=grand.toFixed(2)+'€';
+}
+
+function checkout(){
+  alert('JVLM PARIS\n──────────────\nCommande confirmée!\nVous recevrez une confirmation par email.\n\nMerci de votre confiance.');
+}
+
+let boxMesh,stripeMeshes=[];
+
+function initThree(){
+  const container=document.getElementById('canvas-container');
+  const canvas=document.getElementById('three-canvas');
+  scene=new THREE.Scene();
+  scene.background=new THREE.Color(0x111111);
+  camera=new THREE.PerspectiveCamera(45,container.offsetWidth/container.offsetHeight,0.1,100);
+  camera.position.set(0,0.5,4);
+  renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+  renderer.setSize(container.offsetWidth,container.offsetHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+
+  const ambLight=new THREE.AmbientLight(0xffffff,0.4);
+  scene.add(ambLight);
+  const dirLight=new THREE.DirectionalLight(0xffffff,1.2);
+  dirLight.position.set(3,5,4);
+  scene.add(dirLight);
+  const fillLight=new THREE.DirectionalLight(0xff2200,0.3);
+  fillLight.position.set(-3,-2,-3);
+  scene.add(fillLight);
+
+  productGroup=new THREE.Group();
+  scene.add(productGroup);
+
+  const geo=new THREE.BoxGeometry(1.8,2.4,0.3);
+  const mat=new THREE.MeshLambertMaterial({color:0xf5f5f0});
+  boxMesh=new THREE.Mesh(geo,mat);
+  productGroup.add(boxMesh);
+
+  const stripeCount=7;
+  stripeMeshes=[];
+  for(let i=0;i<stripeCount;i++){
+    const sg=new THREE.PlaneGeometry(1.82,0.28);
+    const sm=new THREE.MeshLambertMaterial({color: i%2===0?0x0a0a0a:0xf5f5f0});
+    const stripe=new THREE.Mesh(sg,sm);
+    stripe.position.set(0,-1.0+i*0.32,0.16);
+    productGroup.add(stripe);
+    stripeMeshes.push(stripe);
+  }
+
+  const textGeo=new THREE.PlaneGeometry(1.2,0.25);
+  const textMat=new THREE.MeshLambertMaterial({color:0xcc0000});
+  const textMesh=new THREE.Mesh(textGeo,textMat);
+  textMesh.position.set(0.1,0.2,0.162);
+  productGroup.add(textMesh);
+
+  const shelfGeo=new THREE.BoxGeometry(6,0.05,1.5);
+  const shelfMat=new THREE.MeshLambertMaterial({color:0x1a1a1a});
+  const shelf=new THREE.Mesh(shelfGeo,shelfMat);
+  shelf.position.set(0,-1.35,0);
+  scene.add(shelf);
+
+  const backGeo=new THREE.PlaneGeometry(6,3);
+  const backMat=new THREE.MeshLambertMaterial({color:0x0d0d0d});
+  const back=new THREE.Mesh(backGeo,backMat);
+  back.position.set(0,0,-0.8);
+  scene.add(back);
+
+  let otherBoxes=[];
+  [[-2.5,0],[2.5,0],[-2.5,0.05],[2.5,0.05]].forEach(([x,z],i)=>{
+    const og=new THREE.BoxGeometry(1.2+Math.random()*0.4,2+Math.random()*0.6,0.25);
+    const om=new THREE.MeshLambertMaterial({color:[0x222222,0x1a1a1a,0x333333,0x111111][i]});
+    const ob=new THREE.Mesh(og,om);
+    ob.position.set(x,-0.15+Math.random()*0.1,z);
+    scene.add(ob);
+    otherBoxes.push(ob);
+  });
+
+  canvas.addEventListener('mousedown',e=>{isDragging=true;prevMouse={x:e.clientX,y:e.clientY}});
+  canvas.addEventListener('mousemove',e=>{
+    if(!isDragging)return;
+    const dx=e.clientX-prevMouse.x;
+    const dy=e.clientY-prevMouse.y;
+    productGroup.rotation.y+=dx*0.01;
+    productGroup.rotation.x+=dy*0.005;
+    productGroup.rotation.x=Math.max(-0.5,Math.min(0.5,productGroup.rotation.x));
+    prevMouse={x:e.clientX,y:e.clientY};
+  });
+  canvas.addEventListener('mouseup',()=>isDragging=false);
+  canvas.addEventListener('mouseleave',()=>isDragging=false);
+  canvas.addEventListener('wheel',e=>{
+    camera.position.z=Math.max(2,Math.min(7,camera.position.z+e.deltaY*0.005));
+  });
+
+  canvas.addEventListener('touchstart',e=>{isDragging=true;prevMouse={x:e.touches[0].clientX,y:e.touches[0].clientY}},{passive:true});
+  canvas.addEventListener('touchmove',e=>{
+    if(!isDragging)return;
+    const dx=e.touches[0].clientX-prevMouse.x;
+    productGroup.rotation.y+=dx*0.01;
+    prevMouse={x:e.touches[0].clientX,y:e.touches[0].clientY};
+  },{passive:true});
+  canvas.addEventListener('touchend',()=>isDragging=false);
+
+  gsap.to(productGroup.rotation,{y:Math.PI*2,duration:8,repeat:-1,ease:'none'});
+
+  function animate(){
+    requestAnimationFrame(animate);
+    if(!isDragging){
+    }
+    renderer.render(scene,camera);
+  }
+  animate();
+
+  window.addEventListener('resize',()=>{
+    const w=container.offsetWidth;
+    const h=container.offsetHeight;
+    camera.aspect=w/h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w,h);
+  });
+}
+
+function updateBoxColor(hex){
+  if(!boxMesh)return;
+  const c=new THREE.Color(hex);
+  boxMesh.material.color.set(c);
+  const isLight=c.r+c.g+c.b>1.5;
+  stripeMeshes.forEach((s,i)=>{
+    s.material.color.set(i%2===0?(isLight?0x0a0a0a:0xf5f5f0):(isLight?0xf5f5f0:0x222222));
+  });
+}
+
+buildGrid();
+initThree();
+renderCart();
+
+gsap.from('.receipt-header',{y:-20,opacity:0,duration:0.8,ease:'power2.out'});
+gsap.from('.shelf-section',{y:30,opacity:0,duration:0.8,delay:0.3,ease:'power2.out'});
+</script>
